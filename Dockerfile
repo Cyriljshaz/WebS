@@ -11,5 +11,5 @@ RUN apt-get update
 RUN apt install nodejs -y
 RUN apt install npm -y
 RUN npm i axios
-COPY "./" "./site/"
+COPY "./" "./app"
 EXPOSE 82

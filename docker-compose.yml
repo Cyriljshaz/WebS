@@ -1,0 +1,24 @@
+version: "3"
+services:
+  serv_webscrap:
+    image: webscraper
+    depends_on:
+      - mysql
+    ports: -80:80
+    networks:
+      - networkWebscrap
+    volumes:
+      - ./:/app
+  serv_mysql:
+    image: mysql:8.0.28
+    ports:
+      - 8080:8080
+    networks:
+      - networkWebscrap
+  serv_selenium:
+    image: selenium/standalone-chrome:98.0
+    networks:
+      - networkWebscrap
+
+networks:
+  networkWebscrap:
