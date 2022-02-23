@@ -6,11 +6,11 @@ im = Image.open("Capture.PNG")
 enh = ImageEnhance.Contrast(im)
 im = enh.enhance(3)  # .show("30% more contrast")
 colo = ImageEnhance.Color(im)
-im = colo.enhance(0.5)
+im = colo.enhance(0)
 lum = ImageEnhance.Brightness(im)
-im = lum.enhance(2)
+im = lum.enhance(2.5)
 shar = ImageEnhance.Sharpness(im)
-im = shar.enhance(3)
+im = shar.enhance(0.2)
 
 # im.show()
 im.save("code.png")
@@ -26,8 +26,8 @@ def test1():
     txt = pytesseract.image_to_string(thr)
     print("result :: %s" % txt)
 
-    cv2.imshow("image", thr)
-    cv2.waitKey(4000)
+    # cv2.imshow("image", thr)
+    # cv2.waitKey(4000)
 
 
 def test2():
