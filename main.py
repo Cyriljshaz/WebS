@@ -1,37 +1,41 @@
+from asyncio.windows_events import NULL
 import cv2
 import pytesseract
 from PIL import Image, ImageEnhance
+import re
 
-im = Image.open("Capture.PNG")
-enh = ImageEnhance.Contrast(im)
-im = enh.enhance(3)  # .show("30% more contrast")
-colo = ImageEnhance.Color(im)
-im = colo.enhance(0)
-lum = ImageEnhance.Brightness(im)
-im = lum.enhance(2.5)
-shar = ImageEnhance.Sharpness(im)
-im = shar.enhance(0.2)
-
-# im.show()
-im.save("code.png")
+CAPTCHA_LEN = 4
+BASE_IMG = "Capture2.PNG"
+ENCHANCED_IMG = "code.png"
 
 
-def test1():
-    img = cv2.imread("code.png")
+def enchanceCaptchaPic():
+    im = Image.open(BASE_IMG)
+    enh = ImageEnhance.Contrast(im)
+    im = enh.enhance(3)  # .show("30% more contrast")
+    colo = ImageEnhance.Color(im)
+    im = colo.enhance(0)
+    lum = ImageEnhance.Brightness(im)
+    im = lum.enhance(2.5)
+    shar = ImageEnhance.Sharpness(im)
+    im = shar.enhance(0.2)
+
+    # im.show()
+    im.save(ENCHANCED_IMG)
+
+def testScanPic1():
+    img = cv2.imread(ENCHANCED_IMG)
     (h, w) = img.shape[:2]
     img = cv2.resize(img, (w * 3, h * 3))
     gry = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     thr = cv2.threshold(gry, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
 
     txt = pytesseract.image_to_string(thr)
-    print("result :: %s" % txt)
-
-    # cv2.imshow("image", thr)
-    # cv2.waitKey(4000)
+    return txt
 
 
-def test2():
-    img = cv2.imread("code.png")
+def testScanPic2():
+    img = cv2.imread(ENCHANCED_IMG)
     (h, w) = img.shape[:2]
     img = cv2.resize(img, (w * 3, h * 3))
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -67,28 +71,76 @@ def test2():
     # Then rectangular part is cropped and passed on
     # to pytesseract for extracting text from it
     # Extracted text is then written into the text file
-    for cnt in contours:
-        x, y, w, h = cv2.boundingRect(cnt)
+    text = pytesseract.image_to_string(im2)
 
-        # Drawing a rectangle on copied image
-        # rect = cv2.rectangle(im2, (x, y), (x + w, y + h), (0, 255, 0), 2)
-
-        # Cropping the text block for giving input to OCR
-        # cropped = im2[y : y + h, x : x + w]
-
-        # Open the file in append mode
-        file = open("recognized.txt", "a")
-
-        # Apply OCR on the cropped image
-        text = pytesseract.image_to_string(im2)
-
-        # Appending the text into file
-        file.write(text)
-        file.write("\n")
-
-        # Close the file
-        file.close
+    return text
 
 
-test2()
-test1()
+def getCaptcha():
+    enchanceCaptchaPic()
+    captcha1 = cleanCaptchaString(testScanPic2())
+    captcha2 = cleanCaptchaString(testScanPic1())
+
+    if len(captcha1) == CAPTCHA_LEN and isInt(captcha1):
+        return captcha1
+    elif len(captcha2) == CAPTCHA_LEN and isInt(captcha2):
+        return captcha2
+
+    # Try rebuild captcha
+    rebuildedCaptcha = buildCaptcha(captcha1, captcha2)
+
+    if rebuildedCaptcha != False:
+        return rebuildedCaptcha
+    
+    return False
+
+
+def cleanCaptchaString(strToclean):
+    cleanStr = strToclean.strip()
+    cleanStr = re.sub(r"\s+", "", cleanStr)
+    cleanStr = re.sub("[^0-9]", "*", cleanStr)
+    return cleanStr
+
+
+def isInt(toTest):
+    isInt = False
+    try:
+        int(toTest)
+        isInt = True
+    except:
+        isInt = False
+    finally:
+        return isInt
+
+
+def buildCaptcha(captcha1, captcha2):
+    #  data we will itenerate trough
+    base = captcha1
+    ref = captcha2
+
+    if len(captcha2) == CAPTCHA_LEN or len(captcha2) > len(captcha1):
+        base = captcha2
+        ref = captcha2
+
+    ref = list(ref)
+    rebuild = list(base)
+
+    for index, letter in enumerate(base):
+        if letter == "*":
+            try:
+                rebuild[index] = ref[index]
+            except:
+                return False
+
+    rebuild = "".join(rebuild)
+    if len(rebuild) == CAPTCHA_LEN and isInt(rebuild):
+        return rebuild
+
+    return False
+
+
+
+if "__main__" == __name__:
+    catpcha = getCaptcha()
+    # if catpcha != False:
+    #     catpcha
