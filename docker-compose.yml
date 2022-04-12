@@ -1,24 +1,16 @@
 version: "3"
 services:
-  serv_webscrap:
-    image: webscraper
-    depends_on:
-      - mysql
-    ports: -80:80
-    networks:
-      - networkWebscrap
-    volumes:
-      - ./:/app
-  serv_mysql:
-    image: mysql:8.0.28
+  webscrapper:
+    image: seblrd/webscrapper
     ports:
-      - 8080:8080
+      - 81:80
+    volumes:
+      - ./:/usr/share/nginx/html
     networks:
-      - networkWebscrap
-  serv_selenium:
-    image: selenium/standalone-chrome:98.0
-    networks:
-      - networkWebscrap
+      network_ws:
+        aliases:
+          - webscrapper.local
 
 networks:
-  networkWebscrap:
+  network_ws:
+    driver: bridge
