@@ -23,6 +23,7 @@ def enchanceCaptchaPic():
     # im.show()
     im.save(ENCHANCED_IMG)
 
+
 def testScanPic1():
     img = cv2.imread(ENCHANCED_IMG)
     (h, w) = img.shape[:2]
@@ -91,7 +92,7 @@ def getCaptcha():
 
     if rebuildedCaptcha != False:
         return rebuildedCaptcha
-    
+
     return False
 
 
@@ -139,8 +140,8 @@ def buildCaptcha(captcha1, captcha2):
     return False
 
 
-
 if "__main__" == __name__:
-    catpcha = getCaptcha()
+    # catpcha = getCaptcha()
+    print("DOcker runnig")
     # if catpcha != False:
     #     catpcha

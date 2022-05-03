@@ -1,0 +1,6 @@
+version: "3"
+services:
+  webscrapper-python:
+    image: seblrd/webscrap_python
+    volumes:
+      - ./:/app

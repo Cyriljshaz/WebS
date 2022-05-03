@@ -2,15 +2,19 @@ version: "3"
 services:
   webscrapper:
     image: seblrd/webscrapper
-    ports:
-      - 81:80
+    expose:
+      - 8002
     volumes:
       - ./:/usr/share/nginx/html
-    networks:
-      network_ws:
-        aliases:
-          - webscrapper.local
+    environment:
+      - VIRTUAL_HOST=test.webscrapper.com
+
+  webscrapper-python:
+    image: python:3.8.13
+    volumes:
+      - ./python:/app
 
 networks:
-  network_ws:
-    driver: bridge
+  default:
+    external:
+      name: nginx-proxy
