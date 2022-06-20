@@ -14,10 +14,17 @@ class Scan:
         self.name = "Scan"
 
     def fetchOneScan(self):
-        options = webdriver.FirefoxOptions()
-        options.add_argument("--headless")  # example
-        driver = webdriver.Remote("http://127.0.0.1:4444/wd/hub", options=options)
-        driver.get("https://readmanganato.com/manga-ko987549")
-        title = driver.find_element(By.CSS_SELECTOR, ".panel-chapter-info-top h1")
-        driver.close()
+        chrome_options = webdriver.ChromeOptions()
+        chrome_options.add_argument("--no-sandbox")
+        chrome_options.add_argument("--window-size=1920,1080")
+        chrome_options.add_argument("--headless")
+        chrome_options.add_argument("--disable-gpu")
+        chrome_options.add_argument("--disable-dev-shm-usage")
+
+        driver = webdriver.Chrome(chrome_options=chrome_options)
+        # driver.close()
+        driver.get("https://www.readmanganato.com/manga-ec981811/chapter-122")
+        screenshot = driver.save_screenshot("test.png")
+        title = driver.find_element(By.TAG_NAME, "h1")
+        # driver.close()
         print(title.text)

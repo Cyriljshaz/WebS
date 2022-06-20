@@ -6,8 +6,8 @@ PATHTOPROJ="C:/Users/sebas/Documents/WORK/webscrapper/python"
 # docker run -d -p 4444:4444 --shm-size="2g" --rm selenium/standalone-chrome:4.2.2-20220609
 
 
-docker rm -f $IMG_NAME
+# docker rm -f $IMG_NAME
 docker build -t $IMG_NAME .
-docker run -it --rm --name $PROC_NAME $IMG_NAME 
+docker run  -v /mnt/c/Users/sebas/Documents/WORK/webscrapper/python:/app -it --rm --name $PROC_NAME $IMG_NAME 
 
 # docker run -it --rm --name webscrap_python seblrd/webscrap_python
