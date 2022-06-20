@@ -2,8 +2,12 @@
 IMG_NAME="seblrd/webscrap_python"
 PROC_NAME="webscrap_python"
 PATHTOPROJ="C:/Users/sebas/Documents/WORK/webscrapper/python"
-export DOCKER_BUILDKIT=0
-export COMPOSE_DOCKER_CLI_BUILD=0
-# docker build -t $IMG_NAME .
-# docker rm -f $IMG_NAME
-docker run --name $PROC_NAME --rm -it -v /mnt/c/Users/sebas/Documents/WORK/webscrapper/python:/app $IMG_NAME bash
+
+# docker run -d -p 4444:4444 --shm-size="2g" --rm selenium/standalone-chrome:4.2.2-20220609
+
+
+docker rm -f $IMG_NAME
+docker build -t $IMG_NAME .
+docker run -it --rm --name $PROC_NAME $IMG_NAME 
+
+# docker run -it --rm --name webscrap_python seblrd/webscrap_python
