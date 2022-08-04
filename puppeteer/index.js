@@ -58,18 +58,17 @@ class ScrapWebsite {
                 return listUrl;
             }, this.selector);
 
-            var counter = 1;
-            imagesHref.forEach(async imageHref => {
+            for (let i = 0; i < imagesHref.length; i++) {
                 try {
-                    await this.saveImage(imageHref);
-
+                    var domain = `https://${this.getDomainUrl()}/`;
+                    await this.saveImage(imagesHref[i], i);
                 } catch (error) {
-                    console.log("Error in saving image :: " + error);
-                    console.log("Error in saving image URL :: " + imageHref);
+                    console.log("Error getImagesFromUrl():: " + error);
+                    console.log("Error getImagesFromUrl() in saving image URL :: " + imageHref);
                 } finally {
-                    counter++;
+                    await this.sleep(2000);
                 }
-            });
+            }
         } catch (error) {
             console.log("Can't get images from url : " + error);
         }
@@ -91,12 +90,15 @@ class ScrapWebsite {
     }
 
     async saveImage(imageHref, counter) {
+        counter += 1;
         var domain = `https://${this.getDomainUrl()}/`;
+        const localPage = this.page;
         console.log("Pic URL :: " + domain + imageHref);
-        var viewSource = await this.page.goto(domain + imageHref);
-        fs.writeFile(`img/test/TEST-FILE-${counter}.png`, await viewSource.buffer(), function (err) {
+        var viewSource = await localPage.goto(domain + imageHref);
+
+        await fs.writeFile(`img/test/TEST-FILE-${counter}.png`, await viewSource.buffer(), function (err) {
             if (err) {
-                return console.log("Error in writting file :: " + err);
+                return console.log("saveImage() : Error in writting file :: " + err);
             }
 
             console.log("The file was saved!");
@@ -128,14 +130,17 @@ class ScrapWebsite {
             console.log("Can't run job : " + error);
         } finally {
             console.log("Closing browser...");
-            await scrap.closeBrowser();
+            await this.closeBrowser();
         }
+    }
+
+    async sleep(ms) {
+        return await new Promise(resolve => setTimeout(resolve, ms));
     }
 }
 
 
 const scrap = new ScrapWebsite();
-scrap.domain = "https://www.tutorialspoint.com/puppeteer/puppeteer_id_selector.htm";
 scrap.url = "https://www.tutorialspoint.com/puppeteer/puppeteer_id_selector.htm";
 scrap.selector = "img";
 scrap.runJob();
