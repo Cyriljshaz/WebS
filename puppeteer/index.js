@@ -53,15 +53,22 @@ class ScrapWebsite {
             let imagesHref = await this.page.evaluate((sel) => {
                 listUrl = [];
                 document.querySelectorAll(sel).forEach(element => {
-                    listUrl.push(element.getAttribute('src').replace('/', ''))
+                    listUrl.push(element.getAttribute('src').replace('/', ''));
                 });
                 return listUrl;
             }, this.selector);
 
             var counter = 1;
-            await imagesHref.forEach(async imageHref => {
-                await this.saveImage(imageHref);
-                counter++;
+            imagesHref.forEach(async imageHref => {
+                try {
+                    await this.saveImage(imageHref);
+
+                } catch (error) {
+                    console.log("Error in saving image :: " + error);
+                    console.log("Error in saving image URL :: " + imageHref);
+                } finally {
+                    counter++;
+                }
             });
         } catch (error) {
             console.log("Can't get images from url : " + error);
@@ -85,6 +92,7 @@ class ScrapWebsite {
 
     async saveImage(imageHref, counter) {
         var domain = `https://${this.getDomainUrl()}/`;
+        console.log("Pic URL :: " + domain + imageHref);
         var viewSource = await this.page.goto(domain + imageHref);
         fs.writeFile(`img/test/TEST-FILE-${counter}.png`, await viewSource.buffer(), function (err) {
             if (err) {
@@ -102,7 +110,6 @@ class ScrapWebsite {
 
     getDomainUrl() {
         const url = (new URL(this.url)).hostname;
-        console.log(url);
         return url;
     }
 
