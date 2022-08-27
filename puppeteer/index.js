@@ -1,7 +1,11 @@
-var websites = ["AsuraScans"];
+var websites = ["AsuraScans", "Non existing"];
 
 websites.forEach(website => {
-    const currWebsite = require('./websites/' + website + '.js');
-    eval("var scrap = new currWebsite();")
-    scrap.runJob();
+    try {
+        const currWebsite = require('./classes/websites/' + website + '.js');
+        eval("var scrap = new currWebsite();")
+        scrap.runJob();
+    } catch (error) {
+        console.log("No class for web site :: " + website);
+    }
 });

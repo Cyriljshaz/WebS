@@ -1,7 +1,6 @@
 const fs = require('fs');
 
 class Model {
-
     constructor() {
         this.puppeteer = require("puppeteer");
         this.browser = null;
