@@ -7,7 +7,7 @@ PATHTOPROJ="C:/Users/sebas/Documents/WORK/webscrapper/puppeteer"
 
 
 docker build -t $IMG_NAME .
-# docker rm -f $IMG_NAME
+docker rm -f $IMG_NAME
 # docker run  -v /mnt/c/Users/sebas/Documents/WORK/webscrapper/puppeteer:/app/puppeteer -it --rm --name $PROC_NAME $IMG_NAME 
 
 #docker run -it --rm -v C:\Users\sebas\Documents\WORK\webscrapper\puppeteer/:/app seblrd/puppeteer index.js
