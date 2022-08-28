@@ -3,6 +3,7 @@ var websites = {
         {
             "scs_id": "",
             "scs_last_chapter": "",
+            "tls_name": "AsuraScans",
             // check new chapter
             "tls_target_chap_list": "",
             "scs_mainpage_url": "",
@@ -17,13 +18,20 @@ var websites = {
     ]
 };
 
-websites.forEach(website => {
+for (var website in websites) {
     try {
         const currWebsite = require('./classes/websites/' + website["tls_name"] + '.js');
     } catch (error) {
         const currWebsite = require('./classes/websites/Model.js');
         console.log("No class for web site :: " + website["tls_name"]);
+        console.log("Getting default class Model");
     }
-    eval("var scrap = new currWebsite();")
+
+    eval("var scrap = new currWebsite(website);")
     scrap.runJob();
-});
+
+}
+
+
+// websites.forEach(website => {
+// });

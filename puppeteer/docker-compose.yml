@@ -1,8 +1,0 @@
-version: "3"
-services:
-  puppeteer:
-    container_name: puppeteer
-    image: seblrd/puppeteer
-    volumes:
-      - /mnt/c/Users/sebas/Documents/WORK/webscrapper/puppeteer/:/app
-    network_mode: bridge

@@ -5,6 +5,12 @@ class Model {
         this.puppeteer = require("puppeteer");
         this.browser = null;
         this.page = null;
+
+    }
+    dynamicBuildVar(datas) {
+        for (var data in datas) {
+            eval(`this.${data} = ${datas}[${data}]`);
+        }
     }
 
     async getImagesFromUrl() {
@@ -80,17 +86,18 @@ class Model {
     }
 
     async runJob() {
-        try {
-            await this.buildBrowser()
-            await this.goToUrl(this.url);
-            await this.getImagesFromUrl();
-            console.log("Done");
-        } catch (error) {
-            console.log("Can't run job : " + error);
-        } finally {
-            console.log("Closing browser...");
-            await this.closeBrowser();
-        }
+        console.log("TEST dyn var :: " + this.tls_name);
+        // try {
+        //     await this.buildBrowser()
+        //     await this.goToUrl(this.url);
+        //     await this.getImagesFromUrl();
+        //     console.log("Done");
+        // } catch (error) {
+        //     console.log("Can't run job : " + error);
+        // } finally {
+        //     console.log("Closing browser...");
+        //     await this.closeBrowser();
+        // }
     }
 
     async sleep(ms) {
