@@ -5,7 +5,6 @@ class AsuraScans extends Model {
         super()
         this.url = "https://www.tutorialspoint.com/puppeteer/puppeteer_id_selector.htm";
         this.selector = "img";
-
     }
 }
 
