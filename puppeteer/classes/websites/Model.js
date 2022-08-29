@@ -5,12 +5,17 @@ class Model {
         this.puppeteer = require("puppeteer");
         this.browser = null;
         this.page = null;
-
+        console.log("BUILDING...")
     }
     dynamicBuildVar(datas) {
+        console.log("passhere :: ", datas)
         for (var data in datas) {
-            eval(`this.${data} = ${datas}[${data}]`);
+            var value = datas[data];
+            eval(`this.${data} = '${value}'`);
         }
+
+        console.log("THIS :: ", this.tls_name)
+        console.table("THIS2 :: ", this.scans.scs_id)
     }
 
     async getImagesFromUrl() {

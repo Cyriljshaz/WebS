@@ -1,37 +1,36 @@
-var websites = {
-    "AsuraScans": [
-        {
-            "scs_id": "",
-            "scs_last_chapter": "",
-            "tls_name": "AsuraScans",
-            // check new chapter
-            "tls_target_chap_list": "",
-            "scs_mainpage_url": "",
-
-
-            // Scrap scan if new
-            "tls_url_scrap": "",
-            "scs_name": "",
-            'tls_target_chapter_nbr': "",
-            'tls_target_next_btn': "",
-        }
-    ]
-};
+var websites = [
+    {
+        "tls_name": "AsuraScans",
+        "tls_target_chap_list": "",
+        "scs_mainpage_url": "",
+        'tls_target_next_btn': "",
+        "scans": [
+            {
+                "scs_last_chapter": "",
+                "scs_id": "1",
+                // Scrap scan if new
+                "tls_url_scrap": "",
+                "scs_name": "",
+                'tls_target_chapter_nbr': "",
+            }
+        ]
+    }
+];
 
 for (var website in websites) {
+    var dataWeb = websites[website]
     try {
-        const currWebsite = require('./classes/websites/' + website["tls_name"] + '.js');
+        currWebsite = require('./classes/websites/' + dataWeb["tls_name"] + '.js');
     } catch (error) {
-        const currWebsite = require('./classes/websites/Model.js');
-        console.log("No class for web site :: " + website["tls_name"]);
+        currWebsite = require('./classes/websites/Model.js');
+        console.log("No class for web site :: " + dataWeb["tls_name"]);
         console.log("Getting default class Model");
     }
-
-    eval("var scrap = new currWebsite(website);")
-    scrap.runJob();
-
+    eval("var scrap = new currWebsite();")
+    var dataScans = dataWeb["scans"]; // TODO AUTO BUILD VAR LATER
+    scrap.dynamicBuildVar(dataWeb);
+    for (var scan in dataScans) {
+        var dataScan = dataScans[scan]
+        scrap.runJob();
+    }
 }
-
-
-// websites.forEach(website => {
-// });
