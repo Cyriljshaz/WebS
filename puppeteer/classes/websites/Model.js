@@ -8,14 +8,30 @@ class Model {
         console.log("BUILDING...")
     }
     dynamicBuildVar(datas) {
-        console.log("passhere :: ", datas)
+        // console.log("passhere :: ", datas)
         for (var data in datas) {
             var value = datas[data];
             eval(`this.${data} = '${value}'`);
         }
+    }
 
-        console.log("THIS :: ", this.tls_name)
-        console.table("THIS2 :: ", this.scans.scs_id)
+    async buildBrowser() {
+        const browser = await this.puppeteer.launch({
+            headless: true,
+            slowMo: 200,
+            args: [
+                "--disable-setuid-sandbox",
+                "--no-sandbox",
+                '--disable-infobars',
+                '--window-position=0,0',
+                '--ignore-certifcate-errors',
+                '--ignore-certifcate-errors-spki-list',
+            ]
+        });
+        this.browser = browser;
+        const page = await browser.newPage();
+        this.page = page;
+        await this.page.setViewport({ width: 1280, height: 800 });
     }
 
     async getImagesFromUrl() {
@@ -26,11 +42,11 @@ class Model {
                     listUrl.push(element.getAttribute('src').replace('/', ''));
                 });
                 return listUrl;
-            }, this.selector);
+            }, this.tls_scrap_img);
 
             for (let i = 0; i < imagesHref.length; i++) {
                 try {
-                    var domain = `https://${this.getDomainUrl()}/`;
+                    console.log("writting pic :: ",)
                     await this.saveImage(imagesHref[i], i);
                 } catch (error) {
                     console.log("Error getImagesFromUrl():: " + error);
@@ -44,29 +60,13 @@ class Model {
         }
     }
 
-
-    async buildBrowser() {
-        const browser = await this.puppeteer.launch({
-            headless: true,
-            args: [
-                "--disable-setuid-sandbox",
-                "--no-sandbox",
-            ]
-        });
-        this.browser = browser;
-        const page = await browser.newPage();
-        this.page = page;
-        await this.page.setViewport({ width: 1280, height: 800 });
-    }
-
     async saveImage(imageHref, counter) {
         counter += 1;
-        var domain = `https://${this.getDomainUrl()}/`;
+        var domain = `https://${this.getDomainUrl(url)}`;
         const localPage = this.page;
-        console.log("Pic URL :: " + domain + imageHref);
-        var viewSource = await localPage.goto(domain + imageHref);
-
-        await fs.writeFile(`img/test/TEST-FILE-${counter}.png`, await viewSource.buffer(), function (err) {
+        var viewSource = await localPage.goto(imageHref);
+        var scanName = this.tls_url_scrap.replace(" ", "_");
+        await fs.writeFile(`img/test/${scanName}_${counter}.png`, await viewSource.buffer(), function (err) {
             if (err) {
                 return console.log("saveImage() : Error in writting file :: " + err);
             }
@@ -76,12 +76,23 @@ class Model {
     }
 
     async goToUrl(url) {
-        this.currentUrl = url;
-        await this.page.goto(url);
+        try {
+            this.currentUrl = `https://${url}`;
+            await this.page.goto(this.currentUrl);
+            await this.page.screenshot({ path: `./debug/debugpic.jpg` });
+            console.log("startwait");
+            await this.sleep(10000);
+            console.log("endwait");
+            await this.page.screenshot({ path: `./debug/debugpic2.jpg` });
+        } catch (error) {
+            console.log("Error when navigate to :: ", this.currentUrl);
+            console.log("ERROR:: ", error);
+            await this.page.screenshot({ path: `./debug/errorpic.jpg` });
+        }
     }
 
-    getDomainUrl() {
-        const url = (new URL(this.url)).hostname;
+    getDomainUrl(url) {
+        var url = (new URL(url)).hostname;
         return url;
     }
 
@@ -91,18 +102,17 @@ class Model {
     }
 
     async runJob() {
-        console.log("TEST dyn var :: " + this.tls_name);
-        // try {
-        //     await this.buildBrowser()
-        //     await this.goToUrl(this.url);
-        //     await this.getImagesFromUrl();
-        //     console.log("Done");
-        // } catch (error) {
-        //     console.log("Can't run job : " + error);
-        // } finally {
-        //     console.log("Closing browser...");
-        //     await this.closeBrowser();
-        // }
+        try {
+            await this.buildBrowser()
+            await this.goToUrl(this.tls_url_scrap);
+            await this.getImagesFromUrl();
+            console.log("Done");
+        } catch (error) {
+            console.log("Can't run job : " + error);
+        } finally {
+            console.log("Closing browser...");
+            await this.closeBrowser();
+        }
     }
 
     async sleep(ms) {
