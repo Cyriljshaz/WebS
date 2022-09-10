@@ -12,7 +12,7 @@ var websites = [
                 // Scrap scan if new
                 "tls_url_scrap": "www.asurascans.com/return-of-the-sss-class-ranker-chapter-1",
                 "scs_name": "SSS ranker",
-                'tls_target_chapter_nbr': "",
+                'tls_target_chapter_nbr': "#chapter option[selected]",
             }
         ]
     }

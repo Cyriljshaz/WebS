@@ -18,24 +18,36 @@ class Model {
     async buildBrowser() {
         const browser = await this.puppeteer.launch({
             headless: true,
-            slowMo: 200,
             args: [
                 "--disable-setuid-sandbox",
                 "--no-sandbox",
-                '--disable-infobars',
-                '--window-position=0,0',
-                '--ignore-certifcate-errors',
-                '--ignore-certifcate-errors-spki-list',
             ]
         });
         this.browser = browser;
         const page = await browser.newPage();
         this.page = page;
+
+        // Add user agent to bypass recaptcha
+        var userAgent = require('user-agents');
+        await this.page.setUserAgent(userAgent.toString());
+
         await this.page.setViewport({ width: 1280, height: 800 });
+    }
+    async setCurrentChapterNumber() {
+        let chapterHtml = await this.page.evaluate((sel) => {
+            var chapNbr = document.querySelector(sel).innerHTML;
+            return chapNbr;
+        }, this.tls_target_chapter_nbr);
+
+        var chapterToList = chapterHtml.toLowerCase().split(/(chapter|chapitre)/);
+        var chapNbr = parseInt(chapterToList[chapterToList.indexOf("chapter") + 1]);
+
+        this.currentChapterNbr = chapNbr;
     }
 
     async getImagesFromUrl() {
         try {
+            await this.setCurrentChapterNumber();
             let imagesHref = await this.page.evaluate((sel) => {
                 listUrl = [];
                 document.querySelectorAll(sel).forEach(element => {
@@ -46,13 +58,12 @@ class Model {
 
             for (let i = 0; i < imagesHref.length; i++) {
                 try {
-                    console.log("writting pic :: ",)
                     await this.saveImage(imagesHref[i], i);
                 } catch (error) {
                     console.log("Error getImagesFromUrl():: " + error);
-                    console.log("Error getImagesFromUrl() in saving image URL :: " + imageHref);
+                    console.log("Error getImagesFromUrl() in saving image URL :: " + imagesHref[i]);
                 } finally {
-                    await this.sleep(2000);
+                    await this.sleep();
                 }
             }
         } catch (error) {
@@ -61,12 +72,17 @@ class Model {
     }
 
     async saveImage(imageHref, counter) {
-        counter += 1;
-        var domain = `https://${this.getDomainUrl(url)}`;
+        counter += 1; // I want it to start at 1
         const localPage = this.page;
         var viewSource = await localPage.goto(imageHref);
-        var scanName = this.tls_url_scrap.replace(" ", "_");
-        await fs.writeFile(`img/test/${scanName}_${counter}.png`, await viewSource.buffer(), function (err) {
+        var scanName = this.scs_name.replace(/(-| )/g, "_");
+
+        var directory = `img/${scanName}/chap_${this.currentChapterNbr}`;
+        // Create Dir if not exist 
+        if (!fs.existsSync(directory)) {
+            await fs.mkdirSync(directory, { "recursive": true });
+        }
+        await fs.writeFile(`${directory}/${scanName}_${counter}.png`, await viewSource.buffer(), function (err) {
             if (err) {
                 return console.log("saveImage() : Error in writting file :: " + err);
             }
@@ -80,10 +96,6 @@ class Model {
             this.currentUrl = `https://${url}`;
             await this.page.goto(this.currentUrl);
             await this.page.screenshot({ path: `./debug/debugpic.jpg` });
-            console.log("startwait");
-            await this.sleep(10000);
-            console.log("endwait");
-            await this.page.screenshot({ path: `./debug/debugpic2.jpg` });
         } catch (error) {
             console.log("Error when navigate to :: ", this.currentUrl);
             console.log("ERROR:: ", error);
@@ -115,7 +127,8 @@ class Model {
         }
     }
 
-    async sleep(ms) {
+    async sleep(min = 1, max = 3) {
+        var ms = (Math.random() * (max - min) + min) * 1000;
         return await new Promise(resolve => setTimeout(resolve, ms));
     }
 }
