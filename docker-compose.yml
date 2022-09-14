@@ -1,18 +1,7 @@
 version: "3.1"
 services:
-    webscrapper:
-        image: seblrd/webscrapper
-        expose:
-            - 80
-        volumes:
-            - ./:/usr/share/nginx/html
-        environment:
-            - VIRTUAL_HOST=test.reader.com
-    db:
+    ws-db:
         image: mariadb:10.3
-        # NOTE: use of "mysql_native_password" is not recommended: https://dev.mysql.com/doc/refman/8.0/en/upgrading-from-previous-series.html#upgrade-caching-sha2-password
-        # (this is just an example, not intended to be a production configuration)
-        # command: --default-authentication-plugin=mysql_native_password
         restart: always
         volumes:
             - ./databases:/var/lib/mysql
@@ -29,7 +18,27 @@ services:
         environment:
             - PMA_ARBITRARY=1
             - PMA_HOST=db
-            - VIRTUAL_HOST=test.phpadmin.reader.com
+            - VIRTUAL_HOST=phpadmin.reader.local
+        depends_on:
+            - ws-db
+
+    ws-laravel:
+        image: docker.io/bitnami/laravel:9
+        ports:
+            - 8000:8000
+        expose:
+            - 82
+        environment:
+            - DB_HOST=mariadb
+            - DB_PORT=3306
+            - DB_USERNAME=root
+            - DB_DATABASE=webscrapper
+
+            - VIRTUAL_HOST=reader.local
+        volumes:
+            - './laravel-app:/app'
+        depends_on:
+            - ws-db
 networks:
     default:
         external:
