@@ -1,45 +1,53 @@
 version: "3.1"
 services:
     ws-db:
+        container_name: ws-db
         image: mariadb:10.3
         restart: always
         volumes:
             - ./databases:/var/lib/mysql
         environment:
-            MYSQL_ROOT_PASSWORD: password
+            - MYSQL_ROOT_PASSWORD=password
+            - MARIADB_USER=laravel
+            - MARIADB_PASSWORD=password
+            - MARIADB_DATABASE=webscrapper
+            - TZ=Europe/Paris
 
-    phpmyadmin:
+    ws-phpmyadmin:
+        container_name: ws-phpmyadmin
         image: phpmyadmin
         restart: always
         ports:
             - 8080:80
         expose:
-            - 81
+            - 8080
         environment:
-            - PMA_ARBITRARY=1
-            - PMA_HOST=db
+            # - PMA_ARBITRARY=1
+            - PMA_HOST=ws-db
+            - PMA_PORT=3306
             - VIRTUAL_HOST=phpadmin.reader.local
+            - TZ=Europe/Paris
         depends_on:
             - ws-db
 
-    ws-laravel:
+    ws-app:
+        container_name: ws-app
         image: docker.io/bitnami/laravel:9
         ports:
             - 8000:8000
         expose:
-            - 82
+            - 8000
         environment:
-            - DB_HOST=mariadb
+            - DB_HOST=ws-db
             - DB_PORT=3306
             - DB_USERNAME=root
+            - DB_PASSWORD=password
             - DB_DATABASE=webscrapper
-
-            - VIRTUAL_HOST=reader.local
         volumes:
             - './laravel-app:/app'
         depends_on:
             - ws-db
-networks:
-    default:
-        external:
-            name: reverse-proxy
+# networks:
+#     default:
+#         external:
+#             name: reverse-proxy
