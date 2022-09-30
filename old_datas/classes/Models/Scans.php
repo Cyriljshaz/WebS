@@ -19,4 +19,4 @@ class ScansModel
             'scs_translator',
         ];
     }
-}
+} 
